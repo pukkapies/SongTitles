@@ -1,0 +1,13 @@
+*.wav
+*.png
+*.aif
+*.npy
+*.jpg
+*.jpeg
+*.xml
+*.pyc
+*.DS_Store
+
+saved_models/
+__pycache__/
+.idea/
