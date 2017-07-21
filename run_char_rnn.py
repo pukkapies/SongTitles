@@ -10,17 +10,16 @@ from char_rnn import CharRNN
 
 
 # For server
-# MODEL_FOLDER = '/home/kevin/Jukedeck/composition/composition/training/vae/saved_models/L2_z2_h256_AFprior_3IAF_majmin/'
-# DATASET_PATH = "/home/kevin/Jukedeck/composition/polyphonic_vectors/alkis_non_triadic/both/"
+MODEL_FOLDER = '/home/kevin/pukkapies_github/SongTitles/saved_models/test/'
+TRAINING_DATA_PATH = "/home/kevin/pukkapies_github/SongTitles/data/test/training/"
+VALIDATION_DATA_PATH = "/home/kevin/pukkapies_github/SongTitles/data/test/validation/"
 
 # For laptop
-REPO_FOLDER =  '/Users/kevinwebster/jukedeck/composition'
-# MODEL_FOLDER = REPO_FOLDER + '/composition/training/vae/saved_models/alkis_non_triadic_major/8 - condition_chords/test'
-MODEL_FOLDER = '/Users/kevinwebster/tensorflow/songtitles/saved_models/test/'
-TRAINING_DATA_PATH = "/Users/kevinwebster/tensorflow/songtitles/data/test/training/"
-VALIDATION_DATA_PATH = "/Users/kevinwebster/tensorflow/songtitles/data/test/validation/"
+# MODEL_FOLDER = '/Users/kevinwebster/tensorflow/songtitles/saved_models/test/'
+# TRAINING_DATA_PATH = "/Users/kevinwebster/tensorflow/songtitles/data/test/training/"
+# VALIDATION_DATA_PATH = "/Users/kevinwebster/tensorflow/songtitles/data/test/validation/"
 
-META_GRAPH = "model-1848"
+META_GRAPH = None  # "model-2342"
 
 
 def main(MODEL_FOLDER=MODEL_FOLDER, TRAINING_DATA_PATH=TRAINING_DATA_PATH, VALIDATION_DATA_PATH=VALIDATION_DATA_PATH):
@@ -43,7 +42,6 @@ def main(MODEL_FOLDER=MODEL_FOLDER, TRAINING_DATA_PATH=TRAINING_DATA_PATH, VALID
         with graph.as_default():
             model = CharRNN(settings, graph, MODEL_FOLDER, meta_graph=META_GRAPH)
             print('... done.')
-            # posterior_data is a list of posterior_epss for each category. prior_data is list [prior_eps, prior_z]
 
             print(model.sample())
             print(model.sample())
