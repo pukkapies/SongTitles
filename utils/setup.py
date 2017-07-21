@@ -2,11 +2,11 @@ import json
 
 
 DEFAULT_SETTINGS = {
-    "cuda_batch": 1,
+    "cuda_batch": 2,
     "verbose": False,
     'arch': 'CharRNN',
-    'max_epoch': 2000,
-    "learning_rate": 0.0001,
+    'max_epoch': 200000,
+    "learning_rate": 0.001,
     'validation_frequency': 0,
     'shuffle_before_batching': True,
     "resume_training": None,
