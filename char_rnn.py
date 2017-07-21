@@ -174,7 +174,7 @@ class CharRNN(object):
         clipped = [(tf.clip_by_value(grad, -5, 5), tvar) if grad is not None else (grad, tvar)  # gradient clipping
                    for grad, tvar in grads_and_vars]
         self.train_op = optimiser.apply_gradients(clipped, global_step=self.global_step, name="minimize_cost")
-        self.saver = tf.train.Saver(max_to_keep=1)
+        self.saver = tf.train.Saver(max_to_keep=30)
 
         patience = 0
         best_valid_loss = np.inf
