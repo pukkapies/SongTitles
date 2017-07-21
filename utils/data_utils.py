@@ -9,29 +9,15 @@ def load_data(settings):
     training_data_path = settings['training_data_path']
     validation_data_path = settings['validation_data_path']
 
-    print("Loading data from {}".format(training_data_path))
-    training_data_list = []
-    for filename in os.listdir(training_data_path):
-        if filename[-4:] != '.vec':
-            continue
-        piece = np.loadtxt(training_data_path + filename, dtype=np.int32)
-        training_data_list.append(piece)
-    print("Loaded {} vectorised pieces".format(len(training_data_list)))
+    training_data_list = load_data_list(training_data_path)
+    validation_data_list = load_data_list(validation_data_path)
+
     training_dataset = DatasetFeed(training_data_list, settings['cuda_batch'], shuffle_after_every_epoch=settings['shuffle_after_every_epoch'])
 
     settings.update({'vocab_size': training_dataset.vocab_size})
 
-    print("Loading data from {}".format(validation_data_path))
-    validation_data_list = []
-    for filename in os.listdir(validation_data_path):
-        if filename[-4:] != '.vec':
-            continue
-        piece = np.loadtxt(validation_data_path + filename, dtype=np.int32)
-        validation_data_list.append(piece)
-    print("Loaded {} vectorised pieces".format(len(validation_data_list)))
     validation_dataset = DatasetFeed(validation_data_list, len(validation_data_list),
                                      shuffle_after_every_epoch=False, print_epoch=False)
-
     return training_dataset, validation_dataset
 
 
@@ -118,3 +104,34 @@ class DatasetFeed(object):
         next_input_batch_list, next_target_batch_list = self.next_batch_list()
         return (self.pack_minibatch_list_into_array(next_input_batch_list),
                 self.pack_minibatch_list_into_array(next_target_batch_list))
+
+
+def load_data_list(path):
+    print("Loading data from {}".format(path))
+    data_list = []
+    for filename in os.listdir(path):
+        if filename[-4:] != '.vec':
+            continue
+        piece = np.loadtxt(path + filename, dtype=np.int32)
+        data_list.append(piece)
+    print("Loaded {} vectorised pieces".format(len(data_list)))
+    return data_list
+
+
+def load_data_txt(path):
+    title_strings = []
+    for filename in os.listdir(path):
+        if os.path.isdir(os.path.join(path, filename)) or (filename == '.DS_Store'):
+            continue
+
+        with open(path + filename, 'r') as data_file:
+            lines = data_file.read().split('\n')  # list of titles as strings
+            title_strings.extend(lines)
+    return title_strings
+
+
+def check_data_for_quote(title, loaded_list):
+    for data_title in loaded_list:
+        if data_title == title:
+            return True
+    return False

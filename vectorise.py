@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 
-DATA_FOLDER = '/Users/kevinwebster/tensorflow/songtitles/data/first/'
+DATA_FOLDER = '/Users/kevinwebster/tensorflow/songtitles/data/second/'
 
 
 if __name__ == '__main__':
@@ -26,6 +26,9 @@ if __name__ == '__main__':
             lines = data_file.read().split('\n')  # list of titles as strings
 
         for i, title in enumerate(lines):
+            if len(title) == 0:
+                print("Empty title found at line {}".format(i))
+                continue
             inx = []
             try:
                 for char in title:
