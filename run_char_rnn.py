@@ -10,12 +10,12 @@ from char_rnn import CharRNN
 
 
 # For server
-MODEL_FOLDER = '/home/kevin/pukkapies_github/SongTitles/saved_models/E128_L128_128_len/'
-TRAINING_DATA_PATH = "/home/kevin/pukkapies_github/SongTitles/data/test_length/training/"
-VALIDATION_DATA_PATH = "/home/kevin/pukkapies_github/SongTitles/data/test_length/validation/"
+MODEL_FOLDER = '/home/kevin/pukkapies_github/SongTitles/saved_models/E128_L128_128/'
+TRAINING_DATA_PATH = "/home/kevin/pukkapies_github/SongTitles/data/first/training/"
+VALIDATION_DATA_PATH = "/home/kevin/pukkapies_github/SongTitles/data/first/validation/"
 
 # For laptop
-# MODEL_FOLDER = '/Users/kevinwebster/tensorflow/songtitles/saved_models/E128_L128_128_len/'
+# MODEL_FOLDER = '/Users/kevinwebster/tensorflow/songtitles/saved_models/E128_L128_128_len_average/'
 # TRAINING_DATA_PATH = "/Users/kevinwebster/tensorflow/songtitles/data/test_length/training/"
 # VALIDATION_DATA_PATH = "/Users/kevinwebster/tensorflow/songtitles/data/test_length/validation/"
 
@@ -44,7 +44,7 @@ def main(MODEL_FOLDER=MODEL_FOLDER, TRAINING_DATA_PATH=TRAINING_DATA_PATH, VALID
             print('... done.')
 
             generations = []
-            for _ in range(100):
+            for _ in range(1000):
                 generation = model.sample()
                 print(generation)
                 generations.append(generation)
@@ -54,6 +54,7 @@ def main(MODEL_FOLDER=MODEL_FOLDER, TRAINING_DATA_PATH=TRAINING_DATA_PATH, VALID
                 if generation[:4] == 'good': long_count += 1
                 elif generation[:3] == 'get': short_count += 1
                 else: print('Generation not recognised: {}'.format(generation))
+            print("AVERAGING RESULTS: ")
             print("Long count: ", long_count)
             print("Short count: ", short_count)
 
