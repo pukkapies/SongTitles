@@ -118,7 +118,7 @@ class CharRNN(object):
         print('loss_mask: ', self.loss_mask)
         self.masked_loss = self.premasked_loss * self.loss_mask
         print('masked loss: ', self.masked_loss)
-        self.loss = tf.reduce_mean(self.masked_loss)
+        self.loss = tf.reduce_sum(self.masked_loss)
 
     @staticmethod
     def cross_entropy(obs, actual, offset=1e-7):
