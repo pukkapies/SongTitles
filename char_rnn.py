@@ -18,6 +18,7 @@ class CharRNN(object):
         # Shape [batch_size, seq_len, vocab_size]
 
         self.graph = graph
+        self.meta_graph = meta_graph
         self.scope = scope
         assert model_folder[-1] == '/'
         self.model_folder = model_folder
@@ -28,7 +29,9 @@ class CharRNN(object):
 
         if meta_graph is not None:
             self.saver = tf.train.import_meta_graph(self.model_folder + meta_graph + ".meta")
+            # print([var.name for var in tf.global_variables()])
         else:
+            print("building new model...")
             CharRNN_settings = settings['CharRNN_settings']
 
             self.hidden_sizes = CharRNN_settings['architecture']
@@ -46,7 +49,8 @@ class CharRNN(object):
                 self.sequence_length = tf.shape(self.input_ph)[1]
                 # Override object attributes with the correct graph, but reusing initialized variables:
                 self._build_graph(CharRNN_settings)
-                graph_scope.reuse_variables()
+                # print([var.name for var in tf.global_variables()])
+                # graph_scope.reuse_variables()
             create_CharRNN_collections(self, CharRNN.RESTORE_KEY)
 
     def unpack_handles(self, session):
@@ -102,17 +106,17 @@ class CharRNN(object):
             softmax_w = tf.get_variable("softmax_w", [self.hidden_sizes[-1], self.vocab_size])
             softmax_b = tf.get_variable("softmax_b", [self.vocab_size])
             flatten_outputs = tf.reshape(outputs, [-1, self.hidden_sizes[-1]], name="reshape_outputs")
-            self.flat_logits = tf.matmul(flatten_outputs, softmax_w)  # (batch_size * seq_len, vocab_size)
+            self.flat_logits = tf.matmul(flatten_outputs, softmax_w) + softmax_b  # (batch_size * seq_len, vocab_size)
             print("logits:", self.flat_logits.get_shape())
             self.flat_probs = tf.nn.softmax(self.flat_logits)
             print("flat probs: ", self.flat_probs)
             self.probs = tf.reshape(self.flat_probs, [self.batch_size, self.sequence_length, self.vocab_size])
             print("probs: ", self.probs)
 
-        loss = self.cross_entropy(self.probs, self.targets_one_hot)
-        print('loss: ', loss)
+        self.premasked_loss = self.cross_entropy(self.probs, self.targets_one_hot)
+        print('loss: ', self.premasked_loss)
         print('loss_mask: ', self.loss_mask)
-        self.masked_loss = loss * self.loss_mask
+        self.masked_loss = self.premasked_loss * self.loss_mask
         print('masked loss: ', self.masked_loss)
         self.loss = tf.reduce_mean(self.masked_loss)
 
@@ -129,13 +133,17 @@ class CharRNN(object):
             return -tf.reduce_sum(actual * tf.log(obs_) + (1 - actual) * tf.log(1 - obs_), 2)
 
     def sample(self, max_seq_length=100):
-        input = np.zeros(shape=[1, 1, self.vocab_size], dtype=np.float32)
+        input = np.zeros(shape=[1, 1], dtype=np.float32)
         final_token = False
         chars = []
 
         with tf.Session(graph=self.graph) as sess:
+            self.saver.restore(sess, self.model_folder + self.meta_graph)
             self.unpack_handles(sess)
+            print('here')
+            # print([var.name for var in tf.global_variables()])
             init_state = sess.run(self.initial_state, feed_dict={self.input_ph: input})
+            print([state.c.shape for state in init_state])
 
             while final_token is False:
                 output, state = sess.run([self.probs, self.final_state],
@@ -143,15 +151,14 @@ class CharRNN(object):
                 output = np.squeeze(output)
                 char = np.random.choice(self.vocab, p=output)
                 if char == 'END':
-                    return chars
+                    return ''.join(chars)
                 else:
                     chars.append(char)
                     index = self.vocab.index(char)
-                    input = np.zeros(shape=[self.vocab_size], dtype=np.float32)
-                    input[index] = 1.0
+                    input = np.ones(shape=[1, 1], dtype=np.float32) * index
                     init_state = state
                     if len(chars) >= max_seq_length:
-                        return chars
+                        return ''.join(chars)
 
     def train(self, settings, training_data, validation_data):
         # if is_training and self.dropout > 0:
@@ -187,17 +194,7 @@ class CharRNN(object):
             valid_losses = []
 
             while True:
-                self.global_step += 1
-
                 ((input_arr, input_len, input_mask), (target_arr, target_len, target_mask)) = training_data.next_batch()
-
-                # print(input_arr.shape)
-                # print(target_arr.shape)
-                # print(input_mask.shape)
-
-                train_loss, _ = sess.run([self.loss, self.train_op], feed_dict={self.input_ph: input_arr, self.targets: target_arr,
-                                                                                self.loss_mask: input_mask})
-                train_losses.append(train_loss)
 
                 # For validation
                 ((v_input_arr, v_input_len, v_input_mask),
@@ -205,7 +202,28 @@ class CharRNN(object):
                 validation_loss = sess.run([self.loss], feed_dict={self.input_ph: v_input_arr,
                                                                    self.targets: v_target_arr,
                                                                    self.loss_mask: v_input_mask})
+
+                # premasked_loss, masked_loss = sess.run([self.premasked_loss, self.masked_loss],
+                #                                        feed_dict={self.input_ph: input_arr,
+                #                                                   self.targets: target_arr,
+                #                                                   self.loss_mask: input_mask})
+                #
+                # print(premasked_loss)
+                # print(masked_loss)
+
+                train_loss, _ = sess.run([self.loss, self.train_op], feed_dict={self.input_ph: input_arr,
+                                                                                self.targets: target_arr,
+                                                                                self.loss_mask: input_mask})
+                train_losses.append(train_loss)
+
+                # print("Loss shape: ", train_loss.shape)
+                # print(input_arr)
+                # print(input_mask)
+
                 valid_losses.append(validation_loss)
+
+                step = sess.run(self.global_step)
+                print("step: {}".format(step))
 
                 if training_data.epochs_completed > epoch:  # End of an epoch
                     average_train_loss = np.mean(train_losses)
@@ -223,9 +241,10 @@ class CharRNN(object):
                         results['best_validation_cost'] = float(average_valid_loss)
                         # Update best loss, save model, set patience to 0.
                         best_valid_loss = average_valid_loss
-                        self.save_model(self.model_folder, settings, sess)
-                        create_json(self.model_folder + 'results.json', results)
-                        print('Model saved in %s' % self.model_folder)
+                        if step > 5000:  # Save the model at every time at this point
+                            self.save_model(self.model_folder, settings, sess)
+                            create_json(self.model_folder + 'results.json', results)
+                            print('Model saved in %s' % self.model_folder)
                         patience = 0
                     else:
                         # Increment patience and check if training is to be stopped.
@@ -235,7 +254,8 @@ class CharRNN(object):
                             print('patience threshold of %d reached, exiting...'
                                   % (settings['max_patience']))
                             break
-                elif sess.run(self.global_step) % 50 == 0:  # Save the model every 50 iterations
+
+                if step % 50 == 0:  # Save the model every 50 iterations
                     if average_train_loss < best_train_loss:
                         self.save_model(self.model_folder, settings, sess)
                         best_train_loss = average_train_loss
