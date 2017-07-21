@@ -10,16 +10,16 @@ from char_rnn import CharRNN
 
 
 # For server
-MODEL_FOLDER = '/home/kevin/pukkapies_github/SongTitles/saved_models/test/'
-TRAINING_DATA_PATH = "/home/kevin/pukkapies_github/SongTitles/data/test/training/"
-VALIDATION_DATA_PATH = "/home/kevin/pukkapies_github/SongTitles/data/test/validation/"
+MODEL_FOLDER = '/home/kevin/pukkapies_github/SongTitles/saved_models/E128_L128_128_len/'
+TRAINING_DATA_PATH = "/home/kevin/pukkapies_github/SongTitles/data/test_length/training/"
+VALIDATION_DATA_PATH = "/home/kevin/pukkapies_github/SongTitles/data/test_length/validation/"
 
 # For laptop
-# MODEL_FOLDER = '/Users/kevinwebster/tensorflow/songtitles/saved_models/test/'
-# TRAINING_DATA_PATH = "/Users/kevinwebster/tensorflow/songtitles/data/test/training/"
-# VALIDATION_DATA_PATH = "/Users/kevinwebster/tensorflow/songtitles/data/test/validation/"
+# MODEL_FOLDER = '/Users/kevinwebster/tensorflow/songtitles/saved_models/E128_L128_128_len/'
+# TRAINING_DATA_PATH = "/Users/kevinwebster/tensorflow/songtitles/data/test_length/training/"
+# VALIDATION_DATA_PATH = "/Users/kevinwebster/tensorflow/songtitles/data/test_length/validation/"
 
-META_GRAPH = None  # "model-2342"
+META_GRAPH = None  # "model-1750"
 
 
 def main(MODEL_FOLDER=MODEL_FOLDER, TRAINING_DATA_PATH=TRAINING_DATA_PATH, VALIDATION_DATA_PATH=VALIDATION_DATA_PATH):
@@ -43,8 +43,20 @@ def main(MODEL_FOLDER=MODEL_FOLDER, TRAINING_DATA_PATH=TRAINING_DATA_PATH, VALID
             model = CharRNN(settings, graph, MODEL_FOLDER, meta_graph=META_GRAPH)
             print('... done.')
 
-            print(model.sample())
-            print(model.sample())
+            generations = []
+            for _ in range(100):
+                generation = model.sample()
+                print(generation)
+                generations.append(generation)
+            long_count = 0
+            short_count = 0
+            for generation in generations:
+                if generation[:4] == 'good': long_count += 1
+                elif generation[:3] == 'get': short_count += 1
+                else: print('Generation not recognised: {}'.format(generation))
+            print("Long count: ", long_count)
+            print("Short count: ", short_count)
+
     else:  # Build a new model
         print("\nBuilding new model...")
         if MODEL_FOLDER[-1] != '/': MODEL_FOLDER += '/'
