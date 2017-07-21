@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 
-DATA_FOLDER = '/Users/kevinwebster/tensorflow/songtitles/data/test/'
+DATA_FOLDER = '/Users/kevinwebster/tensorflow/songtitles/data/first/'
 
 
 if __name__ == '__main__':
@@ -29,7 +29,14 @@ if __name__ == '__main__':
             inx = []
             try:
                 for char in title:
-                    inx.append(char_to_index(char))
+                    if char == '\xe2':
+                        inx.append(char_to_index("'"))
+                    elif char == '\x80':
+                        continue
+                    elif char == '\x99':
+                        continue
+                    else:
+                        inx.append(char_to_index(char))
                 inx.append(char_to_index('END'))
 
                 seq_length = len(inx)
@@ -38,6 +45,7 @@ if __name__ == '__main__':
                 np.savetxt(VEC_OUTPUT_FOLDER + '{}.vec'.format(vec_counter), np_inx, fmt='%d')
                 vec_counter += 1
             except:
+                # print([char for char in title])
                 print("Vectorisation failed in filename {}, title number {}".format(filename, i + 1))
 
 

@@ -147,6 +147,7 @@ class CharRNN(object):
                 output, state = sess.run([self.probs, self.final_state],
                                              feed_dict={self.input_ph: input, self.initial_state: init_state})
                 output = np.squeeze(output)
+                # print(output)
                 char = np.random.choice(self.vocab, p=output)
                 if char == 'END':
                     return ''.join(chars)
@@ -173,7 +174,7 @@ class CharRNN(object):
         clipped = [(tf.clip_by_value(grad, -5, 5), tvar) if grad is not None else (grad, tvar)  # gradient clipping
                    for grad, tvar in grads_and_vars]
         self.train_op = optimiser.apply_gradients(clipped, global_step=self.global_step, name="minimize_cost")
-        self.saver = tf.train.Saver()
+        self.saver = tf.train.Saver(max_to_keep=1)
 
         patience = 0
         best_valid_loss = np.inf
