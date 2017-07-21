@@ -241,7 +241,7 @@ class CharRNN(object):
                         results['best_validation_cost'] = float(average_valid_loss)
                         # Update best loss, save model, set patience to 0.
                         best_valid_loss = average_valid_loss
-                        if step > 5000:  # Save the model at every time at this point
+                        if step > 50000:  # Save the model at every time at this point
                             self.save_model(self.model_folder, settings, sess)
                             create_json(self.model_folder + 'results.json', results)
                             print('Model saved in %s' % self.model_folder)
@@ -249,6 +249,7 @@ class CharRNN(object):
                     else:
                         # Increment patience and check if training is to be stopped.
                         patience += 1
+                        print("Patience = {}".format(patience))
 
                         if patience == settings['max_patience']:
                             print('patience threshold of %d reached, exiting...'
