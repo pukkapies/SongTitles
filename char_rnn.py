@@ -140,10 +140,8 @@ class CharRNN(object):
         with tf.Session(graph=self.graph) as sess:
             self.saver.restore(sess, self.model_folder + self.meta_graph)
             self.unpack_handles(sess)
-            print('here')
             # print([var.name for var in tf.global_variables()])
             init_state = sess.run(self.initial_state, feed_dict={self.input_ph: input})
-            print([state.c.shape for state in init_state])
 
             while final_token is False:
                 output, state = sess.run([self.probs, self.final_state],
