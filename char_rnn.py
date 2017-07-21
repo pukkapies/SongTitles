@@ -240,7 +240,7 @@ class CharRNN(object):
                         results['best_validation_cost'] = float(average_valid_loss)
                         # Update best loss, save model, set patience to 0.
                         best_valid_loss = average_valid_loss
-                        if step > 50000:  # Save the model at every time at this point
+                        if step > 500000:  # Save the model at every time at this point
                             self.save_model(self.model_folder, settings, sess)
                             create_json(self.model_folder + 'results.json', results)
                             print('Model saved in %s' % self.model_folder)
@@ -255,19 +255,19 @@ class CharRNN(object):
                                   % (settings['max_patience']))
                             break
 
-                if step % 50 == 0:  # Save the model every 50 iterations
-                    if average_train_loss < best_train_loss:
-                        self.save_model(self.model_folder, settings, sess)
-                        best_train_loss = average_train_loss
-                        create_json(self.model_folder + 'results.json', results)
-                        print('Model saved in %s' % self.model_folder)
-                        # patience = 0
-                    else:
-                        pass
-                        # patience += 1
-                        # print('patience = {}'.format(patience))
-                        # if patience == settings['max_patience']:
-                        #     print('patience threshold of %d reached, exiting...'
-                        #           % (settings['max_patience']))
-                        #     break
+                    if epoch % 10 == 0:  # Save the model every 10 epochs
+                        if average_train_loss < best_train_loss:
+                            self.save_model(self.model_folder, settings, sess)
+                            best_train_loss = average_train_loss
+                            create_json(self.model_folder + 'results.json', results)
+                            print('Model saved in %s' % self.model_folder)
+                            # patience = 0
+                        else:
+                            pass
+                            # patience += 1
+                            # print('patience = {}'.format(patience))
+                            # if patience == settings['max_patience']:
+                            #     print('patience threshold of %d reached, exiting...'
+                            #           % (settings['max_patience']))
+                            #     break
                 if epoch >= max_epochs: break
