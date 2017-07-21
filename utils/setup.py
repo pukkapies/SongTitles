@@ -2,7 +2,7 @@ import json
 
 
 DEFAULT_SETTINGS = {
-    "cuda_batch": 2,
+    "cuda_batch": 50,
     "verbose": False,
     'arch': 'CharRNN',
     'max_epoch': 200000,
