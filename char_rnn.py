@@ -222,7 +222,7 @@ class CharRNN(object):
                 valid_losses.append(validation_loss)
 
                 step = sess.run(self.global_step)
-                print("step: {}".format(step))
+                # print("step: {}".format(step))
 
                 if training_data.epochs_completed > epoch:  # End of an epoch
                     average_train_loss = np.mean(train_losses)
