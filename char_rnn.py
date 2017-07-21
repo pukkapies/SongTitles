@@ -174,7 +174,7 @@ class CharRNN(object):
         clipped = [(tf.clip_by_value(grad, -5, 5), tvar) if grad is not None else (grad, tvar)  # gradient clipping
                    for grad, tvar in grads_and_vars]
         self.train_op = optimiser.apply_gradients(clipped, global_step=self.global_step, name="minimize_cost")
-        self.saver = tf.train.Saver(max_to_keep=50)
+        self.saver = tf.train.Saver(max_to_keep=7)
 
         patience = 0
         best_valid_loss = np.inf
@@ -255,7 +255,7 @@ class CharRNN(object):
                                   % (settings['max_patience']))
                             break
 
-                    if (epoch -1 ) % 2 == 0:  # Save the model every 10 epochs
+                    if (epoch -1 ) % 2 == 0:  # Save the model every 2 epochs
                         if average_train_loss < best_train_loss:
                             self.save_model(self.model_folder, settings, sess)
                             best_train_loss = average_train_loss
