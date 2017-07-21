@@ -255,7 +255,7 @@ class CharRNN(object):
                                   % (settings['max_patience']))
                             break
 
-                    if epoch % 2 == 0:  # Save the model every 10 epochs
+                    if (epoch -1 ) % 2 == 0:  # Save the model every 10 epochs
                         if average_train_loss < best_train_loss:
                             self.save_model(self.model_folder, settings, sess)
                             best_train_loss = average_train_loss
