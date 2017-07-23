@@ -51,7 +51,7 @@ def main(MODEL_FOLDER=MODEL_FOLDER, TRAINING_DATA_PATH=TRAINING_DATA_PATH, VALID
             print('... done.')
 
 
-            for _ in range(35):
+            for _ in range(100):
                 generation = model.sample()
                 if check_data_for_quote(generation, loaded_data_list):
                     # print("QUOTE FOUND: ")

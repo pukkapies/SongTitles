@@ -54,7 +54,7 @@ def process_title_string(title):
     chars = []
     previous_char = ''
     for i, char in enumerate(title):
-        if i == 0 or previous_char == ' ':
+        if i == 0 or previous_char in [' ', '(']:
             char = char.upper()
         chars.append(char)
         previous_char = char

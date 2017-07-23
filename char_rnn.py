@@ -143,7 +143,7 @@ class CharRNN(object):
             # print([var.name for var in tf.global_variables()])
             init_state = sess.run(self.initial_state, feed_dict={self.input_ph: input})
 
-            while final_token is False:
+            while True:
                 output, state = sess.run([self.probs, self.final_state],
                                              feed_dict={self.input_ph: input, self.initial_state: init_state})
                 output = np.squeeze(output)
